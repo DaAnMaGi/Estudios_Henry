@@ -1,47 +1,55 @@
 create database Clase_5;
 
 use Clase_5;
+drop table alumnos;
+drop table cohorte;
+drop table instructor;
+drop table carrera;
+
 create table Carrera
 (
-	IDCarrera int not null auto_increment,
+	idCarrera int not null auto_increment,
     Nombre varchar(50) NOT NULL,
-    primary key (IDCarrera)
+    primary key (idCarrera)
 );
 
 create table Instructor
 (
-	ID_Inst int not null auto_increment,
-    Cédula_Identidad int not null,
+	idInstructor int not null auto_increment,
+    cedulaIdentidad int not null,
     Nombre varchar(50) not null,
     Apellido varchar(50) not null,
     Fecha_Nacimiento date not null,
-    Fecha_Incorporación date not null,
-    primary key(ID_Inst)
+    Fecha_Incorporación date,
+    primary key(idInstructor)
 );
 
-create table Cohorte
+create table cohorte
 (
-	IDCohorte int not null auto_increment,
-    Codigo_Cohorte varchar(50) not null,
-    Carrera int not null,
-    Fecha_inicio date,
-    Fecha_Final date,
-    Instructor int not null,
-    primary key (IDCohorte),
-    foreign key(Carrera) references carrera(IDCarrera),
-    foreign key(Instructor) references Instructor(ID_Inst)
+	idCohorte int not null auto_increment,
+    codigo varchar(50) not null,
+    idCarrera int not null,
+    idInstructor int not null,
+    fechainicio date,
+    fechaFinal date,
+    
+    primary key (idCohorte),
+    foreign key(idCarrera) references carrera(idCarrera),
+    foreign key(idInstructor) references Instructor(idInstructor)
 );
 
 
-create table Alumnos
+create table alumnos
 (
-	ID_Alum int not null auto_increment,
-    Cédula_Identidad int not null,
-    Nombre varchar(50) not null,
-    Apellido varchar(50) not null,
-    Fecha_Nacimiento date not null,
-    Fecha_Ingreso date not null,
-    Cohorte int not null,
-    primary key (ID_Alum),
-    foreign key (Cohorte) references Cohorte(IDCohorte)
+	idAlumno int not null auto_increment,
+    cedulaIdentidad int not null,
+    nombre varchar(50) not null,
+    apellido varchar(50) not null,
+    fechaNacimiento date not null,
+    fechaIngreso date,
+    idCohorte int,
+    
+    primary key (idAlumno),
+    foreign key (idCohorte) references cohorte(idCohorte)
 )
+
