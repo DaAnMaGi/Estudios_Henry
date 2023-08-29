@@ -16,7 +16,7 @@ create table Carrera
 create table Instructor
 (
 	idInstructor int not null auto_increment,
-    cedulaIdentidad int not null,
+    cedulaIdentidad varchar(50) not null,
     Nombre varchar(50) not null,
     Apellido varchar(50) not null,
     Fecha_Nacimiento date not null,
@@ -42,7 +42,7 @@ create table cohorte
 create table alumnos
 (
 	idAlumno int not null auto_increment,
-    cedulaIdentidad int not null,
+    cedulaIdentidad varchar(50) not null,
     nombre varchar(50) not null,
     apellido varchar(50) not null,
     fechaNacimiento date not null,
