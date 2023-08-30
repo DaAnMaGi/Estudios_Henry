@@ -1,3 +1,5 @@
+# 2 ):Crear una tabla con los siguientes campos: id_local, nombre, categoria, direccion, barrio, comuna, para posteriormente poblarla con los datos bajados, utilzando el conector desde el script de Python.
+
 create database homework_c8;
 use homework_c8;
 
