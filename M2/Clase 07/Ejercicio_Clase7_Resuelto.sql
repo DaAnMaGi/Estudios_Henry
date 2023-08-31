@@ -6,15 +6,31 @@ use clase_5;
 
 select count(*) as n_carreras
 	from carrera; #Respuesta es 2 carreras
+    
+    # se puede recomendar usar el conteo siempre sobre una columna específica.
+	select count(idCarrera) as n_carreras
+	from carrera;
+
 
 # 2. ¿Cuantos alumnos hay en total?
+delete from alumnos
+where idAlumno = 181;
 
 select count(*) as n_alumnos 
 	from alumnos; # Respuesta es 180 alumnos
+    
+    # se puede recomendar usar el conteo siempre sobre una columna específica.
+    select count(idAlumno) as n_alumnos 
+	from alumnos;
 
 # 3. ¿Cuantos alumnos tiene cada cohorte?
 
 select idCohorte, count(*) as n_alumnos
+	from alumnos
+    group by idCohorte;
+    
+    # se puede recomendar usar el conteo siempre sobre una columna específica.
+	select idCohorte, count(idAlumno) as n_alumnos
 	from alumnos
     group by idCohorte;
 
@@ -67,31 +83,61 @@ select year(fechaIngreso) as año_ingreso, count(*) as n_Estudiantes
 # 11. Investigue las funciones TIMESTAMPDIFF() y CURDATE(). ¿Podría utilizarlas para saber cual es la edad de los instructores?. ¿Como podrías verificar si la función cálcula años completos? Utiliza DATE_ADD().
 
 select 
-	timestampdiff(year,Fecha_Nacimiento,curdate()) as edad_instructor, Nombre,Apellido
+	timestampdiff(year,Fecha_Nacimiento,curdate()) as edad_instructor, 
+    Nombre,
+    Apellido
 	from instructor;
 
+# Podemos usarla para sumar los datos y que nos dé el cumpleaños de la persona en este año.
+
+	select 
+			date_add(Fecha_Nacimiento, INTERVAL timestampdiff(year,Fecha_Nacimiento,curdate()) year) as "Cumpleaños 2023",
+			Nombre,
+			Apellido,
+			Fecha_Nacimiento
+		from instructor
+        ORDER BY fecha_nacimiento;
+    
 # 12. Cálcula:<br>
 #            - La edad de cada alumno.<br>
 
-select concat(nombre," ",apellido) as Nombre_Completo, timestampdiff(year,fechaNacimiento,curdate()) as Edad_estudiante
-	from alumnos;
+select 
+	concat(nombre," ",apellido) as Nombre_Completo, 
+	timestampdiff(year,fechaNacimiento,curdate()) as Edad_estudiante
+	
+    from alumnos;
 
 #            - La edad promedio de los alumnos de henry.<br>
 
-select round(avg(timestampdiff(year,fechaNacimiento,curdate()))) as Promedio_Edad
+select 
+	avg(timestampdiff(year,fechaNacimiento,curdate())) as Promedio_Edad
+	from alumnos
+    where fechaNacimiento not in (select min(fechaNacimiento) from alumnos);
+
+select 
+	max(timestampdiff(year,fechaNacimiento,curdate())) 
 	from alumnos;
+
+select min(fechaNacimiento)
+from alumnos;
 
 #            - La edad promedio de los alumnos de cada cohorte.<br>
 
-select idCohorte, round(avg(timestampdiff(year,fechaNacimiento,curdate()))) as Promedio_Edad
+select 	
+	idCohorte, 
+    round(avg(timestampdiff(year,fechaNacimiento,curdate()))) as Promedio_Edad
 	from alumnos
-    group by idCohorte;
+    group by idCohorte
+    order by idCohorte;
 
 # 13. Elabora un listado de los alumnos que superan la edad promedio de Henry.
 
 select 
-	year(fechaNacimiento) as Año_Nacimiento, concat(nombre," ",apellido) as Nombre_Completo, timestampdiff(year,fechaNacimiento,curdate()) as Edad_Estudiante
+	year(fechaNacimiento) as Año_Nacimiento, 
+    concat(nombre," ",apellido) as Nombre_Completo, 
+    timestampdiff(year,fechaNacimiento,curdate()) as Edad_Estudiante
 	from alumnos
-    where timestampdiff(year,fechaNacimiento,curdate()) > (select round(avg(timestampdiff(year,fechaNacimiento,curdate()))) as Promedio_Edad
+    where 
+    timestampdiff(year,fechaNacimiento,curdate()) > (select round(avg(timestampdiff(year,fechaNacimiento,curdate()))) as Promedio_Edad
 		from alumnos)
 	order by 1;
