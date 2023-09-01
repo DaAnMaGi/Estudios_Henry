@@ -20,8 +20,8 @@ select * from store;
 # 1) ¿Cuántos nombres distintos hay en la columna first_name en la tabla customer?
 
 select 
-	distinct count(first_name)
-	from customer; -- 599
+	count(distinct first_name) #El distinct se coloca al lado de aquello que queremos señalar como único.
+	from customer; -- 591 distinct counts
 
 # 2) ¿Cuál es el título de la película mas larga en la tabla film?
 
@@ -46,13 +46,17 @@ select
 # 4) ¿Cuál es el nombre del actor/actriz que salió en más películas durante el año 2006?
 
 select 
-	concat(actor.first_name," ",actor.last_name) as "Nombre actor/actriz",
-    count(film_actor.film_id) as "Número de películas"
-    from actor
-    join film_actor
-    on actor.actor_id = film_actor.actor_id
-	group by actor.actor_id
-    order by count(film_actor.film_id) desc
+	concat(A.first_name," ",A.last_name) as "Nombre actor/actriz",
+    count(FA.film_id) as "Número de películas"
+    from actor A
+    
+    join film_actor FA
+		on A.actor_id = FA.actor_id
+    join film F
+		on FA.film_id = F.film_id
+	where f.release_year = 2006
+    group by A.actor_id
+    order by count(FA.film_id) desc
     limit 1;
     
 # 5) ¿Cuál es la categoría de la película HAWK CHILL y su duración?
@@ -60,17 +64,17 @@ select
     select * from film where title like "%HAWK CHILL%"; -- 407
     
     select 
-		film.film_id as "ID", 
-        film.title as "Nombre película",
-        film.length as "Duración",
-        category.name as "Categoría"
+		f.film_id as "ID", 
+        f.title as "Nombre película",
+        f.length as "Duración",
+        c.name as "Categoría"
         
-        from film 
-        join film_category
-        on film.film_id = film_category.film_id
-        join category
-        on film_category.category_id = category.category_id
-        where film.title like "%HAWK CHILL%";
+        from film f
+        join film_category fc
+        on f.film_id = fc.film_id
+        join category c
+        on fc.category_id = c.category_id
+        where f.title like "HAWK CHILL";
 
 # Bonus) ¿En que películas participo KIM ALLEN y cuál es su promedio de duración?
 
