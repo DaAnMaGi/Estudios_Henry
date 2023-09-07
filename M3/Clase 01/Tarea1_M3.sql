@@ -5,7 +5,10 @@ show tables;
 
 # 1. Crear un procedimiento que recibe como parámetro una fecha y muestre la cantidad de órdenes ingresadas en esa fecha.
 
-select * from salesorderheader;
+select 
+	* 
+    from salesorderheader
+    limit 10;
 
 drop procedure ordenes;
 
@@ -13,7 +16,7 @@ DELIMITER $$
 CREATE PROCEDURE ordenes (IN fecha DATE)
 	BEGIN 
 		select
-			date(OrderDate) as "Fecha de ingreso órden",
+			date(OrderDate) as "Fecha de ingreso órden", #Puede ser más eficiente un count(*)
             count(SalesOrderID) AS "Cantidad de órdenes"
             from salesorderheader
             where date(OrderDate) = fecha;
@@ -21,18 +24,22 @@ CREATE PROCEDURE ordenes (IN fecha DATE)
     DELIMITER ;
 
 CALL ordenes("2001-10-28");
+CALL ordenes("2001-08-13");
+CALL ordenes("2001-08-01");
+CALL ordenes("2001-08-02");
 
 # 2. Crear una función que calcule el valor nominal de un margen bruto determinado por el usuario a partir del precio de lista de los productos.
 
 select * from product;
 select * from productlistpricehistory;
 
-set global log_bin_trust_function_creators = ON;
+set global log_bin_trust_function_creators = ON; #Se puede usar esta o usar el determinsitic en la función.
 
 drop function valor_nominal; 
 
 DELIMITER $$
-create function valor_nominal (precio float, margen float) returns float  # PREGUNTAR POR EL MARGEN BRUTO Y EL VALOR NOMINAL VS MARGEN DE GANANCIA
+create function valor_nominal (precio float, margen float) returns float deterministic # PREGUNTAR POR EL MARGEN BRUTO Y EL VALOR NOMINAL VS MARGEN DE GANANCIA
+# Agregar un "deterministic" permite que la función siempre regrese el mismo resultado.
 	begin
 		declare margen_bruto float;
         
@@ -85,6 +92,10 @@ CALL costo_transporte("2001-11-30","2001-12-31");
 
 CALL costo_transporte("2001-07-25","2001-09-01");
 
+CALL costo_transporte("2001-06-30","2001-07-05");
+
+
+
 # 5. Crear un procedimiento que permita realizar la insercción de datos en la tabla shipmethod.
 
 SELECT * FROM shipmethod;
@@ -104,7 +115,8 @@ delimiter ;
 SELECT * FROM shipmethod;
 
 call inser_shipmethod ("prueba",3.95,1.23);
+call inser_shipmethod ("prueba 2",8.4,3.3);
 
 SELECT * FROM shipmethod;
 
-delete from  shipmethod where ShipMethodID = 6;
+delete from  shipmethod where ShipMethodID > 5;
