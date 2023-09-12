@@ -114,7 +114,7 @@ select date(OrderDate),
     OVER (
 	partition by date(OrderDate)
     )
-    from salesorderheader;
+    from salesorderheaderproductdescriptionproductdescription;
    
 -- Las funciones ventanas se realizan sobre una de las vistas o variables a mostrar del QUERY.
 

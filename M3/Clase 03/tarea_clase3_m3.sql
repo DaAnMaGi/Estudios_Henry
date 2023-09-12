@@ -78,6 +78,13 @@ select
 
 # 2. Obtener un listado por categoría de productos, con el valor total de ventas y productos vendidos, mostrando para ambos, su porcentaje respecto del total.<br>
 
+select * from product; 
+select * from salesorderdetail;
+select * from productcategory;
+select * from productdescription;
+
+-- Revisar después de la clase, está mal.
+
 select
 	categoria,
     volumen,
@@ -85,14 +92,18 @@ select
     total_venta,
     round((total_venta/sum(total_venta) over())*100,2) as porcentaje_total_venta
 	from (select 
-		s.name as categoria,
+		c.name as categoria,
 		sum(d.OrderQty) as volumen,
 		sum(d.LineTotal) as total_venta
 		from salesorderheader h
 		join salesorderdetail d
 			on (h.SalesOrderID = d.SalesOrderID)
-		join shipmethod s
-			on (s.ShipMethodID = h.ShipMethodID)
+		join product s
+			on (s.ProductID = d.ProductID)
+		join productsubcategory s2
+			on (s.ProductSubCategoryID = s2.ProductSubCategoryID)
+		join productcategory c
+			on (s2.ProductCategoryID = c.ProductCategoryID)
 		group by categoria) s;
 
 # 3. Obtener un listado por país (según la dirección de envío), con el valor total de ventas y productos vendidos, mostrando para ambos, su porcentaje respecto del total.<br>
@@ -123,7 +134,8 @@ select
 		join countryregion c
 			on (s.CountryRegionCode = c.CountryRegionCode)
 		group by Pais
-		order by Pais) p;
+		order by Pais
+        ) p;
     
 # 4. Obtener por ProductID, los valores correspondientes a la mediana de las ventas (LineTotal), sobre las ordenes realizadas. Investigar las funciones FLOOR() y CEILING().select 
 
@@ -139,3 +151,40 @@ select
 		on (d.ProductID = p.ProductID)
 	group by ID
     order by ID;
+    
+-- profe
+
+select 
+	productid,
+    avg(linetotal) as mediana
+    from 
+    (productid,
+    linetotal, 
+    count(*) over (partition by productid) as recuento,
+    row_number() over (partition by productid order by linetotal asc
+    ) as orden
+    from salesorderdetail
+    ) a
+	where
+    (floor(recuento/2 = CEELING(recuento/2) and (ORDEN = recuento/2 or orden = recuento/2 +1))
+    OR 
+    FLOOR(RECUENTO/2) != ceiling(recuento/2) and orden= ceiling(recuento/2)
+    from salesorderdetail) s
+    order by productid, linetotal asc;
+    
+-- LEAD Y LAG
+
+select *, 
+	lag(totalVenta,1,null) over (order by anio),
+    lead(totalVenta,2,null) over(order by anio),
+    round(totalVenta - lag(totalVenta,1,null) over (order by anio) / lag(totalVenta,1,null) over (order by anio),2)
+from 
+	( select
+		year(orderdate) as anio,
+        sum(totalDue) as TotalVenta
+        from
+        salesorderheader
+        group by 1) A;
+
+
+-- Investigar las funciones LEAD, LAG y RANK.
