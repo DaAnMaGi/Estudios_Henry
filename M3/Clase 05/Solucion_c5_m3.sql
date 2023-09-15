@@ -281,7 +281,7 @@ update venta v
 	set v.Precio = p.Precio
     where v.Precio = 0;
 
-select * from venta where precio = 0;
+select * from venta;
 
 # Punto 10 -- Identificación de ID Repetidos
 
@@ -297,7 +297,6 @@ select IdCompra, count(*) as conteo
     having conteo > 1
     order by IdCompra; # No hay repetidos.
 
--- Hay repetidos en Empleados
 select IdEmpleado, count(*) as conteo 
 	from empleados 
     group by IdEmpleado
@@ -305,21 +304,6 @@ select IdEmpleado, count(*) as conteo
     order by IdEmpleado; # Existen varios repetidos. 1301, 1674, 1675, 1724, 1725, 
 						# 1968, 1977, 3032, 3144, 3346, 3481, 3504, 3603, 3622, 
 						# 3728, 3842, 3875
-    
-select e.* 
-	from empleados e
-    join (
-		select IdEmpleado, count(*) as conteo 
-		from empleados 
-		group by IdEmpleado
-		having conteo > 1
-		) c
-        on (e.IdEmpleado = c.IdEmpleado)
-	order by e.IdEmpleado; # Revisión de los datos repetidos de empleados.
-    
-
-    
--- Revisión demás tablas. 
 
 select IdProducto, count(*) as conteo 
 	from productos 
@@ -346,3 +330,117 @@ select IdVenta, count(*) as conteo
     group by IdVenta
     having conteo > 1
     order by IdVenta; # No hay repetidos.
+    
+-- Limpieza de la tabla empleados
+
+select e.* 
+	from empleados e
+    join (
+		select IdEmpleado, count(*) as conteo 
+		from empleados 
+		group by IdEmpleado
+		having conteo > 1
+		) c
+        on (e.IdEmpleado = c.IdEmpleado)
+	order by e.IdEmpleado; # Revisión de los datos repetidos de empleados.
+
+-- se agrega el ID de la sucursal a la tabla empleado
+
+alter table empleados add IdSucursal int null default 0 after Sucursal;
+select * from empleados limit 5;
+update empleados set Sucursal = "Mendoza1" where Sucursal = "Mendoza 1";
+update empleados set Sucursal = "Mendoza2" where Sucursal = "Mendoza 2";
+update empleados e 
+	join sucursales s 
+		on (e.Sucursal = s.Sucursal)
+	set e.IdSucursal = s.IdSucursal;
+
+select * from empleados;
+select * from sucursales;
+
+alter table empleados drop Sucursal;
+select * from empleados;
+
+-- Se crea un nuevo código para empleado usando el id de la sucursal
+
+alter table empleados add CodigoEmpleado int null default 0 after IdEmpleado;
+update empleados set CodigoEmpleado = ((IdSucursal * 1000000) + IdEmpleado);
+select * from empleados;
+
+-- Volvemos a revisar que no haya repetidos en la nueva nomenclatura
+
+select CodigoEmpleado, count(*) as conteo 
+	from empleados 
+	group by CodigoEmpleado
+	having conteo > 1
+	order by CodigoEmpleado; -- No hay nuevos repetidos en la nueva nomenclatura 
+    
+-- Limpiamos la tabla empleados dejando la nueva nomenclatura como el ID y actualizamos en la tabla venta el Id de Empleados. 
+
+alter table empleados drop IdEmpleado;
+alter table empleados Change CodigoEmpleado IdEmpleado int not null;
+select * from empleados;
+
+update venta set IdEmpleado = ((IdSucursal * 1000000) + IdEmpleado);
+select * from venta;
+
+### Normalización
+
+# 10) Generar dos nuevas tablas a partir de la tabla 'empelado' que contengan las entidades Cargo y Sector.
+select * from empleados;
+
+drop table if exists sector;
+create table sector(
+	IdSector INT not null auto_increment,
+    Sector varchar(50),
+    primary key (IdSector)
+    );
+    
+insert into sector (Sector) (select distinct Sector from empleados order by 1);
+select * from sector;
+
+-- Normalizamos tabla empleados antes de crear la tabla cargo
+
+update empleados set Cargo = "Vendedor" where Cargo = "Vendedor ";
+
+drop table if exists cargo;
+create table cargo(
+	IdCargo int not null auto_increment,
+    Cargo varchar(50),
+    primary key (IdCargo)
+);
+
+insert into cargo (Cargo) (select distinct Cargo from empleados order by 1);
+select * from cargo;
+
+-- Actualizamos la tabla empleados con los ID
+select * from empleados;
+
+alter table empleados add IdSector int null default 0;
+update empleados e join sector s on (e.Sector = s.Sector) set e.IdSector = s.IdSector;
+alter table empleados drop Sector;
+
+alter table empleados add IdCargo int null default 0;
+update empleados e join cargo c on (e.Cargo = c.Cargo) set e.IdCargo = c.IdCargo;
+alter table empleados drop Cargo;
+
+select * from empleados;
+
+# 11) Generar una nueva tabla a partir de la tabla 'producto' que contenga la entidad Tipo de Producto.
+
+select * from productos;
+
+drop table if exists tipoproducto;
+create table tipoproducto (
+	IdTipoProducto int not null auto_increment,
+    TipoProducto varchar(50),
+    primary key (IdTipoProducto)
+    );
+    
+insert into tipoproducto (TipoProducto) select distinct Tipo from productos;
+select * from tipoproducto;
+select * from productos;
+
+alter table productos add IdTipoProducto int null default 0 after Tipo;
+update productos p join tipoproducto t on (p.Tipo = t.TipoProducto) set p.IdTipoProducto = t.IdTipoProducto;
+alter table productos drop Tipo;
