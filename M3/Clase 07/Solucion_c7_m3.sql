@@ -4,7 +4,7 @@ use henry_3;
 	# Consulta 1
     select 
 		b.Descripcion as canal,
-        sum(a.Precio) as ventas_canal
+        sum(a.Precio * a.cantidad) as ventas_canal
         from venta a
         join canalventa b
 			on (a.IdCanal = b.IdCanal)
@@ -30,7 +30,7 @@ use henry_3;
     # Consulta 3
 	select 
 		b.Sucursal as sucursal,
-		sum(a.Precio) as Ventas
+		sum(a.Precio * a.Cantidad) as Ventas
 		from venta a
 		join sucursales b
 			on (a.IdSucursal = b.IdSucursal)
@@ -42,7 +42,7 @@ use henry_3;
     select 
 		d.Provincia as Provincia,
 		b.Sucursal as sucursal,
-		sum(a.Precio) as Ventas
+		sum(a.Precio * a.cantidad) as Ventas
 		from venta a
 		join sucursales b
 			on (a.IdSucursal = b.IdSucursal)
@@ -57,7 +57,7 @@ use henry_3;
     # Consulta 5
     select 
 		c.TipoProducto as Tipo_Producto,
-        avg(a.Precio) as Promedio_Venta
+        avg(a.Precio * a.Cantidad) as Promedio_Venta
         from venta a
         join productos b
 			on (a.IdProducto = b.IdProducto)
@@ -80,6 +80,9 @@ alter table proveedores add primary key (IdProveedor);
 alter table sucursales add primary key (IdSucursal);
 alter table tipogasto add primary key (IdTipoGasto);
 alter table venta add primary key (IdVenta);
+
+-- revisión tabla empleados
+select * from empleados;
 
 -- foreign key 
 alter table clientes add constraint clientes_localidad foreign key (IdLocalidad) references localidad(IdLocalidad) on delete restrict on update restrict;
@@ -105,7 +108,7 @@ alter table venta add constraint venta_empleado foreign key (IdEmpleado) referen
 alter table venta add constraint venta_producto foreign key (IdProducto) references productos(IdProducto) on delete restrict on update restrict;
 
 alter table venta change IdCliente IdCliente int not null;
-alter table venta add constraint venta_cliente foreign key (IdCliente) references clientes(IdCliente) on delete restrict on update restrict; -- Se solucionó el error "Error Code: 3780. Referencing column 'IdCliente' and referenced column 'IdCliente' in foreign key constraint 'venta_ibfk_1' are incompatible" al cambiar el tipo de dato que existía en el IdCliente de la tabla venta.
+alter table venta add constraint venta_cliente foreign key (IdCliente) references clientes(IdCliente) on delete restrict on update restrict; -- Se solucionó el error "Error Code: 3780. Referencing column 'IdCliente' and referenced column 'IdCliente' in foreign key constraint 'venta_ibfk_1' are incompastible" al cambiar el tipo de dato que existía en el IdCliente de la tabla venta.
 
 
 # 3) Genere la indexación de los campos que representen fechas o ID en las tablas:
@@ -175,13 +178,13 @@ alter table venta add constraint venta_cliente foreign key (IdCliente) reference
 # Consulta 1
     select 
 		b.Descripcion as canal,
-        sum(a.Precio) as ventas_canal
+        sum(a.Precio * a.cantidad) as ventas_canal
         from venta a
         join canalventa b
 			on (a.IdCanal = b.IdCanal)
 		where year(fecha) = 2017
         group by canal
-        order by canal; -- ANTES: 0.313 sec / 0.000 sec || DESPUÉS: 0.407 sec / 0.000 sec
+        order by canal; -- ANTES: 0.313 sec / 0.000 sec || DESPUÉS: 0.407 sec / 0.000 sec 
     
     # Consulta 2
     select 
@@ -201,7 +204,7 @@ alter table venta add constraint venta_cliente foreign key (IdCliente) reference
     # Consulta 3
 	select 
 		b.Sucursal as sucursal,
-		sum(a.Precio) as Ventas
+		sum(a.Precio * a.cantidad) as Ventas
 		from venta a
 		join sucursales b
 			on (a.IdSucursal = b.IdSucursal)
@@ -213,7 +216,7 @@ alter table venta add constraint venta_cliente foreign key (IdCliente) reference
     select 
 		d.Provincia as Provincia,
 		b.Sucursal as sucursal,
-		sum(a.Precio) as Ventas
+		sum(a.Precio * a.cantidad) as Ventas
 		from venta a
 		join sucursales b
 			on (a.IdSucursal = b.IdSucursal)
@@ -247,7 +250,8 @@ alter table venta add constraint venta_cliente foreign key (IdCliente) reference
 	-- IdProducto
 	-- Precio
 	-- Cantidad
-    
+
+# Nota: Evitar crear en la misma base de datos
     drop table if exists fact_venta;
     create table fact_venta (
     IdVenta int,
@@ -266,4 +270,6 @@ alter table venta add constraint venta_cliente foreign key (IdCliente) reference
 insert into fact_venta 
 	select IdVenta, Fecha, Fecha_Entrega, IdCanal, IdCliente, IdEmpleado, IdProducto, Precio, Cantidad
     from venta;
+    
+select * from fact_venta;
     
