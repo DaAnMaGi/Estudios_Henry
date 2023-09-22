@@ -114,6 +114,24 @@ select date(OrderDate),
     OVER (
 	partition by date(OrderDate)
     )
-    from salesorderheader;
-    
+    from salesorderheaderproductdescriptionproductdescription;
+   
+-- Las funciones ventanas se realizan sobre una de las vistas o variables a mostrar del QUERY.
+
 -- Otras funciones ventanas: row_number, rank, first_value, last_value, partition by
+
+select * from purchaseorderheader;
+
+select DISTINCT year(OrderDate),
+	sum(TotalDue)
+		over (
+		partition by year(OrderDate)
+		) AS cantidad_compras
+    from purchaseorderheader;
+    
+-- El partition by sirve para "subdividir" los registros que nos encontramos. 
+
+select distinct concat(c.FirstName," ",c.LastName) as "Nombre Cliente",
+	max(h.TotalDue) over (partition by c.ContactID) - min(h.TotalDue) over (partition by c.ContactID) as Diferencia_Gastos
+    from salesorderheader h
+    join contact c	on (c.ContactID = h.ContactID);
