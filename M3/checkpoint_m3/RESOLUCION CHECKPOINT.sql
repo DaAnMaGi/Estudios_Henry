@@ -164,7 +164,7 @@ from (select
 
 select
 tipo_producto, 
-(venta-compra) as ganancias
+sum(venta-compra) as ganancias
 from 
 (select 
 	c.TipoProducto as tipo_producto,
@@ -179,6 +179,7 @@ from
 		on (d.IdProducto = a.IdProducto)
 	where year(a.Fecha) = 2020
     group by tipo_producto) a
+    group by tipo_producto
     order by ganancias desc;
 
 -- --------------------------------------------------------------------------------------------------------------------
