@@ -1,5 +1,6 @@
 use henry_3;
 SET SQL_SAFE_UPDATES = 0; # Quitar el modo seguro para poder editar las tablas
+SET GLOBAL log_bin_trust_function_creators = 1; # Colocar modo deterministic
 
 select * from canalventa;
 select * from clientes;
@@ -105,6 +106,10 @@ CREATE TABLE calendario (
 
 ALTER TABLE `calendario` ADD UNIQUE(`fecha`);
 CALL Llenar_dimension_calendario('2015-01-01', '2020-12-31');
+
+select * from calendario;
+select count(*) from calendario;
+select datediff("2015/01/01","2020/12/31");
 
 /*LOAD DATA INFILE 'C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\Calendario.csv' 
 INTO TABLE calendario
@@ -272,7 +277,7 @@ update tipogasto set Tipo_Gasto = UC_Words(trim(Tipo_Gasto));
 select * from venta where precio = 0; # No existe consistencia en la columna precio y cantidad ya que existen datos en 0 en precio cuando la cantidad tiene datos, y viceversa.
 select * from productos where precio = 0;
 
-set @@net_read_timeout = 5000;
+set @@net_read_timeout = 500000;
 SET SQL_SAFE_UPDATES = 0;
 
 update venta v 
