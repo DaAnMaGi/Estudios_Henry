@@ -1,6 +1,6 @@
 use adventureworks;
 
-# Crear un procedimiento que recibe como parámetro una fecha y muestre la cantidad de órdenes ingresadas en esa fecha.
+-- Crear un procedimiento que recibe como parámetro una fecha y muestre la cantidad de órdenes ingresadas en esa fecha.
 
 SELECT SalesOrderID, OrderDate, DueDate, CustomerID, SalesPersonID, TotalDue
 	FROM salesorderheader
@@ -22,7 +22,7 @@ SET @orden = 0;
 CALL ordenDia("2001-10-18",@orden); -- Se prueba el procedimiento.
 SELECT @orden;
 
-# Crear una función que calcule el valor nominal de un margen bruto determinado por el usuario a partir del precio de lista de los productos.
+-- Crear una función que calcule el valor nominal de un margen bruto determinado por el usuario a partir del precio de lista de los productos.
 
 SET GLOBAL log_bin_trust_function_creators = 1; -- > Se usa en caso de no querer especificar las funciones en cada ocasión.
 
@@ -40,7 +40,7 @@ DELIMITER ;
 
 select margenBruto (156.54,1.1);
 
-# Obtner un listado de productos en orden alfabético que muestre cuál debería ser el valor de precio de lista, si se quiere aplicar un margen bruto del 20%, utilizando la función creada en el punto 2, sobre el campo StandardCost. Mostrando tambien el campo ListPrice y la diferencia con el nuevo campo creado.
+-- Obtner un listado de productos en orden alfabético que muestre cuál debería ser el valor de precio de lista, si se quiere aplicar un margen bruto del 20%, utilizando la función creada en el punto 2, sobre el campo StandardCost. Mostrando tambien el campo ListPrice y la diferencia con el nuevo campo creado.
 
 -- product --> StandardCost, ProductID, Name, ListPrice
 
@@ -48,7 +48,7 @@ SELECT ProductID, Name, StandardCost, ListPrice, margenBruto(StandardCost,1.20) 
 from product
 order by Name;
 
-# Crear un procedimiento que reciba como parámetro una fecha desde y una hasta, y muestre un listado con los Id de los diez Clientes que más costo de transporte tienen entre esas fechas (campo Freight).
+-- Crear un procedimiento que reciba como parámetro una fecha desde y una hasta, y muestre un listado con los Id de los diez Clientes que más costo de transporte tienen entre esas fechas (campo Freight).
 
 DROP PROCEDURE IF EXISTS costoEnvio;
 
@@ -65,7 +65,7 @@ DELIMITER ;
 
 CALL costoEnvio ("2001-10-1","2001-10-31");
 
-# Crear un procedimiento que permita realizar la insercción de datos en la tabla shipmethod.
+-- Crear un procedimiento que permita realizar la insercción de datos en la tabla shipmethod.
 
 DROP PROCEDURE IF EXISTS agregarEnvio;
 

@@ -1,11 +1,11 @@
-## Creación de database
+-- Creación de database
 
 DROP DATABASE henry;
 CREATE DATABASE henry;
 
 USE henry;
 
-## Creación de tablas
+-- Creación de tablas
 
 CREATE TABLE carrera (
 	idCarrera INT NOT NULL AUTO_INCREMENT,
